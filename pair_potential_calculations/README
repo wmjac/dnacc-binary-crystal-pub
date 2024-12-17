@@ -1,0 +1,10 @@
+
+This is a modified interface to be used with the code of F. Cui et. al., Nat. Comm. 2022, 13 (1), 1--10 
+
+Replace Launch_energyProfile.py in that code with binary_crystal_potentials.py.
+
+binary_crystal_potentials.py uses code in src/ available at github.com/smarbach/DNACoatedColloidsInteractions
+
+# This outputs a full potential file with all contributions, and lammps compatible potential files.
+bash run.sh
+

@@ -1,0 +1,68 @@
+units	lj
+dimension	3
+boundary	p p p
+atom_style	atomic
+
+# Variable definitions
+
+variable	cv equal 0.0
+variable	c format cv %.1f
+variable	sys string "r_300_mw_6.5"
+
+# Read lattice initialized with C=cv, lattice spacing corresponding to minimum of AB pair potential
+# assign gaussian distributed velocities
+
+read_data	bct_C_$c_def_1.05.txt
+mass	* 1
+variable	randseed equal 1123581321
+velocity	all create 1.0 $(v_randseed) mom yes dist gaussian
+
+# Assign pressure, temperature, simulation steps
+
+variable 	p equal 0.0001
+variable	t equal 1.0
+variable	r equal 50000000
+timestep	0.00005
+
+# Define pair interactions
+
+pair_style	table linear 5000  
+pair_coeff 1 1	lammps_pot_like_${sys}_t_25.txt Like_pot
+pair_coeff 1 2	lammps_pot_unlike_${sys}_t_25.txt Unlike_pot
+pair_coeff 2 2  lammps_pot_like_${sys}_t_25.txt Like_pot
+
+minimize	1.0e-4 1.0e-6 1000 1000
+neighbor 	0.3 bin
+neigh_modify	every 1 delay 0 check yes
+
+# Integrator for NPT simulations
+
+fix	1 all npt temp $t $t $(10000.0*dt) tchain 10000 aniso $p $p $(100000.0*dt) pchain 10000
+
+# Equilibrate 
+
+thermo	50000
+thermo_style	custom step temp pe ke press vol enthalpy lx ly lz
+
+run	100000
+
+reset_timestep	0
+
+# Define RDF, order computes
+
+compute	ab_rdf all rdf 1000 1 2
+compute aa_rdf all rdf 1000 1 1
+fix	2 all ave/time 50000 10 $r c_ab_rdf[*] file rdf_AB_${sys}_init_C_$c.txt mode vector
+fix	3 all ave/time 50000 10 $r c_aa_rdf[*] file rdf_AA_${sys}_init_C_$c.txt mode vector
+compute	ord all orientorder/atom degrees 5 4 6 8 10 12 
+
+# Production runs
+
+dump	1 all custom 500000 lmp.traj id type x y z c_ord[*]
+dump_modify	1 pbc yes
+dump_modify	1 sort id
+dump	2 all movie 500000 movie_${sys}_init_C_$c.mpg type type size 640 480
+run 	$r
+
+undump	1
+write_data	final.init nocoeff
