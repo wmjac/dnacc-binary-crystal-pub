@@ -1,3 +1,3 @@
 # dnacc-binary-crystal-pub
 
-# Pair potential calculations, and LAMMPS input scripts
+# BCT crystal theory codes, Pair potential calculations, and LAMMPS input scripts

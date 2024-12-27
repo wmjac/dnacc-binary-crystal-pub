@@ -1,0 +1,10 @@
+
+Phase diagram calculations:
+===========================
+
+compute_spring_network.py:
+Use this to create the data file harmonic-BCT.p.gz, which is needed by phase_diagram.py.  A summary of this information is placed in harmonic-BCT.dat for convenience.
+
+phase_diagram.py:
+Use this to compute the equilibrium BCT parameter for a pair potential, found in ../pair_potential_calculations/
+
